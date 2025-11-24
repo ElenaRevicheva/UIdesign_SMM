@@ -414,12 +414,12 @@
             <div class="orbit-label" style="color: #a855f7;">EDUCATION</div>
         </div>
         
-        <div class="orbit-item orbit-professional emoji-bottom">
+        <div class="orbit-item orbit-professional">
             <div class="orbit-label" style="color: #facc15;">PROFESSIONAL<br>TRANSFORMATION</div>
             <div class="sphere sphere-professional">💼</div>
         </div>
         
-        <div class="orbit-item orbit-personal emoji-bottom">
+        <div class="orbit-item orbit-personal">
             <div class="orbit-label" style="color: #ec4899;">PERSONAL<br>GROWTH</div>
             <div class="sphere sphere-personal">🌱</div>
         </div>

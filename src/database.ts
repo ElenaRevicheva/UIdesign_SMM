@@ -3,36 +3,59 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+// Use thick mode with Oracle Instant Client for better wallet support
+try {
+  oracledb.initOracleClient({ libDir: '/opt/instantclient_23_4' });
+  console.log('✅ Oracle Thick Mode initialized');
+} catch (err: any) {
+  if (err.message.includes('already been initialized')) {
+    console.log('✅ Oracle Thick Mode already initialized');
+  } else {
+    console.error('❌ Oracle Thick Mode error:', err);
+  }
+}
+
+// Set TNS_ADMIN environment variable to point to wallet directory
+process.env.TNS_ADMIN = '/home/ubuntu/cto-aipa/wallet';
+
 interface DBConfig {
   user: string;
   password: string;
-  connectString: string;
+  connectionString: string;
 }
 
 const dbConfig: DBConfig = {
   user: process.env.DB_USER!,
   password: process.env.DB_PASSWORD!,
-  connectString: process.env.DB_CONNECTION_STRING!
+  connectionString: process.env.DB_SERVICE_NAME!
 };
 
 async function initializeDatabase() {
   let connection;
   try {
+    console.log(`🔌 Connecting to ${dbConfig.connectionString}...`);
     connection = await oracledb.getConnection(dbConfig);
-    console.log('🔗 Connected to Oracle Autonomous Database');
-    
+    console.log('🔗 Connected to Oracle Autonomous Database (mTLS)');
+
     await connection.execute(`
-      CREATE TABLE IF NOT EXISTS aipa_memory (
-        id RAW(16) DEFAULT SYS_GUID() PRIMARY KEY,
-        aipa_type VARCHAR2(50) NOT NULL,
-        action VARCHAR2(100) NOT NULL,
-        context CLOB,
-        result CLOB,
-        metadata CLOB,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
+      BEGIN
+        EXECUTE IMMEDIATE 'CREATE TABLE aipa_memory (
+          id RAW(16) DEFAULT SYS_GUID() PRIMARY KEY,
+          aipa_type VARCHAR2(50) NOT NULL,
+          action VARCHAR2(100) NOT NULL,
+          context CLOB,
+          result CLOB,
+          metadata CLOB,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )';
+      EXCEPTION
+        WHEN OTHERS THEN
+          IF SQLCODE != -955 THEN
+            RAISE;
+          END IF;
+      END;
     `);
-    
+
     console.log('✅ Database schema initialized');
   } catch (err) {
     console.error('❌ Database initialization error:', err);
@@ -49,7 +72,7 @@ async function saveMemory(aipaType: string, action: string, context: any, result
   try {
     connection = await oracledb.getConnection(dbConfig);
     await connection.execute(
-      `INSERT INTO aipa_memory (aipa_type, action, context, result, metadata) 
+      `INSERT INTO aipa_memory (aipa_type, action, context, result, metadata)
        VALUES (:aipaType, :action, :context, :result, :metadata)`,
       {
         aipaType,
@@ -75,10 +98,10 @@ async function getRelevantMemory(aipaType: string, action: string, limit: number
   try {
     connection = await oracledb.getConnection(dbConfig);
     const result = await connection.execute(
-      `SELECT context, result, metadata, created_at 
-       FROM aipa_memory 
-       WHERE aipa_type = :aipaType AND action = :action 
-       ORDER BY created_at DESC 
+      `SELECT context, result, metadata, created_at
+       FROM aipa_memory
+       WHERE aipa_type = :aipaType AND action = :action
+       ORDER BY created_at DESC
        FETCH FIRST :limit ROWS ONLY`,
       { aipaType, action, limit }
     );

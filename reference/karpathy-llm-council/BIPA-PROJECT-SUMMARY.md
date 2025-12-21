@@ -275,35 +275,19 @@ For ONE board question with 30-50 page document:
 
 ---
 
-## 10. Communication Sent
+## 10. Communication Status
 
-### Message to Alex (December 21, 2025)
+**Proposal sent:** December 21, 2025 (WhatsApp, Spanish)  
+**Status:** Awaiting response
 
-```
-Hola Sr. Alex, disculpa la demora — tuve un tema de salud familiar 
-esta semana, pero por suerte ya estamos mejor.
+**Summary of what was sent:**
+- MVP pricing: USD 8,000–10,000
+- Upfront: USD 2,500
+- Operational costs: USD 150–350/month (separate)
+- Milestone-based payments with proportional refund policy
+- Invitation to continue conversation by call
 
-Con respecto al precio:
-
-Desarrollo y entrega de MVP (no demo): USD 8,000–10,000 (según alcance)
-• USD 2,500 de anticipo — arquitectura + primer prototipo
-• Pagos por hitos conforme se entrega y valida
-• Pago final al cierre
-
-Costos operativos (APIs, hosting, DB): aparte, de forma transparente, 
-aproximadamente USD 150–350/mes para un piloto.
-
-Si algún hito no se cumple, se contempla un reembolso proporcional 
-de esa etapa. Para mí, la confianza es clave.
-
-Si el rango te parece razonable, con gusto podemos continuar la 
-conversación por llamada y definir alcance, tiempos y forma de trabajo.
-
-Quedo atenta,
-Elena 🙏
-```
-
-### If He Says Yes → Next Steps
+### If Response is Positive → Next Steps
 
 1. Schedule Zoom call
 2. Define exact scope for Phase 1
@@ -311,22 +295,20 @@ Elena 🙏
 4. Set up payment method
 5. Begin architecture work
 
-### If He Negotiates Price
+### If Price Negotiation
 
 **Fallback option (pilot-only):**
-```
-USD 4,000–5,000 pilot
-— Multi-LLM deliberation engine + 1 company prototype
-— 4-5 weeks
-— Extensible if it works well
-```
+- USD 4,000–5,000
+- Multi-LLM deliberation engine + 1 company prototype
+- 4-5 weeks
+- Extensible if it works well
 
-### If He Asks About Employment
+### If Employment Discussion Arises
 
-**On the call, can mention:**
-> "Si en algún momento te resulta más conveniente estructurarlo 
-> como un rol part-time o contractor en vez de proyecto, 
-> también estoy abierta a conversarlo."
+**Can mention on the call:**
+> "If at some point it's more convenient to structure this as a 
+> part-time or contractor role instead of a project, I'm also 
+> open to discussing that."
 
 ---
 
@@ -378,4 +360,4 @@ USD 4,000–5,000 pilot
 ---
 
 *Last updated: December 21, 2025*
-*Status: Awaiting response from Alex*
+*Status: Awaiting client response*

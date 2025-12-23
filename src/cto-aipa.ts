@@ -116,6 +116,19 @@ interface AskCTORequest {
 // CMO INTEGRATION
 // =============================================================================
 
+// Store pending updates for CMO (when webhook is unavailable)
+const pendingCMOUpdates: Array<{
+  timestamp: string;
+  pr_number?: number;
+  commit_sha?: string;
+  repo: string;
+  title: string;
+  description: string;
+  type: string;
+  security_issues: number;
+  complexity_issues: number;
+}> = [];
+
 async function notifyCMO(updateData: {
   pr_number?: number;
   commit_sha?: string;
@@ -126,8 +139,20 @@ async function notifyCMO(updateData: {
   security_issues: number;
   complexity_issues: number;
 }): Promise<boolean> {
+  // Store locally regardless of webhook success
+  const updateWithTimestamp = {
+    ...updateData,
+    timestamp: new Date().toISOString()
+  };
+  pendingCMOUpdates.push(updateWithTimestamp);
+  
+  // Keep only last 50 updates in memory
+  if (pendingCMOUpdates.length > 50) {
+    pendingCMOUpdates.shift();
+  }
+  
   try {
-    const CMO_WEBHOOK = 'https://vibejobhunter-production.up.railway.app/api/tech-update';
+    const CMO_WEBHOOK = process.env.CMO_WEBHOOK_URL || 'https://vibejobhunter-production.up.railway.app/api/tech-update';
     
     console.log(`📢 Notifying CMO AIPA about changes in ${updateData.repo}...`);
     
@@ -142,13 +167,20 @@ async function notifyCMO(updateData: {
       console.log(`✅ CMO acknowledged: ${result.message}`);
       return true;
     } else {
-      console.log(`⚠️ CMO notification failed: ${response.status}`);
+      console.log(`⚠️ CMO webhook returned ${response.status} - update stored locally`);
+      console.log(`   💡 CMO endpoint may need configuration. Updates available at GET /cmo-updates`);
       return false;
     }
   } catch (error) {
-    console.error(`❌ Error notifying CMO: ${error}`);
+    console.log(`⚠️ CMO webhook unavailable - update stored locally`);
+    console.log(`   💡 Updates available at GET /cmo-updates for manual sync`);
     return false;
   }
+}
+
+// Get pending CMO updates (for manual sync or alternative integration)
+function getPendingCMOUpdates() {
+  return pendingCMOUpdates;
 }
 
 // =============================================================================
@@ -475,13 +507,32 @@ async function startCTOAIPA() {
       endpoints: {
         health: 'GET /',
         webhook: 'POST /webhook/github',
-        askCTO: 'POST /ask-cto'
+        askCTO: 'POST /ask-cto',
+        cmoUpdates: 'GET /cmo-updates'
       },
       integrations: {
-        cmo_aipa: 'https://vibejobhunter-production.up.railway.app'
+        cmo_aipa: {
+          url: 'https://vibejobhunter-production.up.railway.app',
+          webhook: process.env.CMO_WEBHOOK_URL || '/api/tech-update (needs CMO update)',
+          pending_updates: getPendingCMOUpdates().length
+        }
       },
       repos_monitored: 11,
       uptime: process.uptime()
+    });
+  });
+
+  // ==========================================================================
+  // CMO UPDATES ENDPOINT - For syncing with CMO AIPA
+  // ==========================================================================
+  
+  app.get('/cmo-updates', (req, res) => {
+    const updates = getPendingCMOUpdates();
+    res.json({
+      status: 'success',
+      count: updates.length,
+      updates,
+      note: 'These are tech updates waiting to be synced with CMO AIPA'
     });
   });
 
@@ -665,7 +716,10 @@ async function startCTOAIPA() {
     console.log(`\n🎧 CTO AIPA v3.0 listening on http://163.192.99.45:${PORT}`);
     console.log(`📡 Webhook: http://163.192.99.45:${PORT}/webhook/github`);
     console.log(`💬 Ask CTO: http://163.192.99.45:${PORT}/ask-cto`);
+    console.log(`📋 CMO Updates: http://163.192.99.45:${PORT}/cmo-updates`);
     console.log(`🏥 Health: http://163.192.99.45:${PORT}/`);
+    console.log(`\n⚠️  Note: CMO webhook endpoint needs update on Railway`);
+    console.log(`   CMO updates are stored locally and available at /cmo-updates`);
     console.log(`\n🤝 Ready to be your Technical Co-Founder!`);
   });
 }

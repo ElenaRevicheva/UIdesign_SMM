@@ -1,6 +1,7 @@
 import Groq from 'groq-sdk';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { initializeDatabase, saveMemory, getRelevantMemory } from './database';
+import { initTelegramBot } from './telegram-bot';
 import * as dotenv from 'dotenv';
 import express from 'express';
 import { Octokit } from '@octokit/rest';
@@ -526,13 +527,15 @@ async function startCTOAIPA() {
         'Performance Issue Detection',
         'AI-Powered Reviews (Configurable Models)',
         'CMO Integration (LinkedIn Announcements)',
-        'AIdeazz Ecosystem Awareness (NEW!)'
+        'AIdeazz Ecosystem Awareness (NEW!)',
+        'Telegram Bot (Chat from phone!)'
       ],
       endpoints: {
         health: 'GET /',
         webhook: 'POST /webhook/github',
         askCTO: 'POST /ask-cto',
-        cmoUpdates: 'GET /cmo-updates'
+        cmoUpdates: 'GET /cmo-updates',
+        telegram: process.env.TELEGRAM_BOT_TOKEN ? 'Active' : 'Not configured'
       },
       ai_models: {
         critical_reviews: AI_MODELS.critical,
@@ -748,8 +751,15 @@ async function startCTOAIPA() {
     console.log(`💬 Ask CTO: http://163.192.99.45:${PORT}/ask-cto`);
     console.log(`📋 CMO Updates: http://163.192.99.45:${PORT}/cmo-updates`);
     console.log(`🏥 Health: http://163.192.99.45:${PORT}/`);
-    console.log(`\n⚠️  Note: CMO webhook endpoint needs update on Railway`);
-    console.log(`   CMO updates are stored locally and available at /cmo-updates`);
+    
+    // Initialize Telegram Bot
+    const telegramBot = initTelegramBot();
+    if (telegramBot) {
+      console.log(`📱 Telegram: Bot starting...`);
+    } else {
+      console.log(`📱 Telegram: Not configured (add TELEGRAM_BOT_TOKEN to .env)`);
+    }
+    
     console.log(`\n🤝 Ready to be your Technical Co-Founder!`);
   });
 }

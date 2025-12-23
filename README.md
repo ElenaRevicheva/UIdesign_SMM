@@ -51,6 +51,7 @@ CTO AIPA is not just a code reviewer — it's a **true AI Technical Co-Founder**
 | `/ask-cto` | POST | Ask any technical question |
 | `/webhook/github` | POST | Receives GitHub webhooks |
 | `/cmo-updates` | GET | View pending CMO updates |
+| **Telegram Bot** | - | Chat with CTO from your phone! |
 
 ### 💬 Ask CTO - Get Technical Advice Anytime
 
@@ -140,6 +141,41 @@ CTO AIPA knows and monitors **11 repositories**:
 | 9 | **ascent-saas-builder** | SaaS Builder Tool |
 | 10 | **aideazz-private-docs** | Private Documentation |
 | 11 | **aideazz-pitch-deck** | Investor Pitch Materials |
+
+---
+
+## 📱 Telegram Bot (NEW!)
+
+Chat with your CTO from your phone!
+
+### Setup
+
+1. Create a bot via [@BotFather](https://t.me/BotFather) on Telegram
+2. Add to `.env` on Oracle Cloud:
+   ```
+   TELEGRAM_BOT_TOKEN=your_token_here
+   TELEGRAM_AUTHORIZED_USERS=your_telegram_user_id
+   ```
+3. Restart: `pm2 restart cto-aipa`
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `/start` | Welcome message |
+| `/status` | AIdeazz ecosystem status |
+| `/ask <question>` | Ask any technical question |
+| `/review <repo>` | Review latest commit |
+| `/repos` | List all repositories |
+| `/suggest` | Get today's suggestion |
+| `/help` | Show all commands |
+
+### Natural Chat
+
+Just send any message:
+- "What should I focus on today?"
+- "How do I add caching to EspaLuz?"
+- "Review my architecture"
 
 ---
 

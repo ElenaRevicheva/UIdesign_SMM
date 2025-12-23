@@ -12,6 +12,29 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 // =============================================================================
+// AI MODEL CONFIGURATION - Change models via environment variables!
+// =============================================================================
+
+const AI_MODELS = {
+  // For critical reviews (security, payments, complex architecture)
+  critical: process.env.CRITICAL_MODEL || 'claude-opus-4-20250514',
+  
+  // For Ask CTO strategic questions
+  strategic: process.env.STRATEGIC_MODEL || 'claude-opus-4-20250514',
+  
+  // For standard code reviews (fast)
+  standard: process.env.STANDARD_MODEL || 'llama-3.3-70b-versatile',
+  
+  // Max tokens for responses
+  maxTokens: parseInt(process.env.MAX_TOKENS || '8192', 10)
+};
+
+console.log('🤖 AI Models configured:');
+console.log(`   Critical reviews: ${AI_MODELS.critical}`);
+console.log(`   Strategic (Ask CTO): ${AI_MODELS.strategic}`);
+console.log(`   Standard reviews: ${AI_MODELS.standard}`);
+
+// =============================================================================
 // AIdeazz ECOSYSTEM CONTEXT - CTO AIPA knows the entire startup
 // =============================================================================
 
@@ -378,18 +401,18 @@ Remember: You're a co-founder, not just a reviewer. Be supportive but honest.`;
   let review: string;
 
   if (hasCriticalIssues) {
-    console.log('🔐 Using Claude Opus 4 for critical code review...');
+    console.log(`🔐 Using ${AI_MODELS.critical} for critical code review...`);
     const response = await anthropic.messages.create({
-      model: 'claude-opus-4-20250514',
-      max_tokens: 8192,
+      model: AI_MODELS.critical,
+      max_tokens: AI_MODELS.maxTokens,
       messages: [{ role: 'user', content: aiPrompt }]
     });
     const firstContent = response.content[0];
     review = firstContent && firstContent.type === 'text' ? firstContent.text : '';
   } else {
-    console.log('⚡ Using Groq for standard code review...');
+    console.log(`⚡ Using ${AI_MODELS.standard} for standard code review...`);
     const response = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: AI_MODELS.standard,
       messages: [{ role: 'user', content: aiPrompt }]
     });
     review = response.choices[0]?.message?.content || '';
@@ -403,7 +426,7 @@ Remember: You're a co-founder, not just a reviewer. Be supportive but honest.`;
     complexity_issues: complexityIssues.length,
     performance_issues: performanceIssues.length
   }, review, {
-    model_used: hasCriticalIssues ? 'claude-opus-4' : 'groq',
+    model_used: hasCriticalIssues ? AI_MODELS.critical : AI_MODELS.standard,
     critical_issues: hasCriticalIssues,
     timestamp: new Date().toISOString()
   });
@@ -447,10 +470,10 @@ Respond as a supportive technical co-founder would:
 - If you don't know something, say so honestly
 - Suggest next steps when appropriate`;
 
-  console.log('🧠 Using Claude Opus 4 for strategic thinking...');
+  console.log(`🧠 Using ${AI_MODELS.strategic} for strategic thinking...`);
   const response = await anthropic.messages.create({
-    model: 'claude-opus-4-20250514',
-    max_tokens: 8192,
+    model: AI_MODELS.strategic,
+    max_tokens: AI_MODELS.maxTokens,
     messages: [{ role: 'user', content: prompt }]
   });
 
@@ -501,7 +524,7 @@ async function startCTOAIPA() {
         'Code Complexity Analysis',
         'Architecture Pattern Detection',
         'Performance Issue Detection',
-        'AI-Powered Reviews (Groq + Claude)',
+        'AI-Powered Reviews (Configurable Models)',
         'CMO Integration (LinkedIn Announcements)',
         'AIdeazz Ecosystem Awareness (NEW!)'
       ],
@@ -511,10 +534,16 @@ async function startCTOAIPA() {
         askCTO: 'POST /ask-cto',
         cmoUpdates: 'GET /cmo-updates'
       },
+      ai_models: {
+        critical_reviews: AI_MODELS.critical,
+        strategic_questions: AI_MODELS.strategic,
+        standard_reviews: AI_MODELS.standard,
+        max_tokens: AI_MODELS.maxTokens
+      },
       integrations: {
         cmo_aipa: {
           url: 'https://vibejobhunter-production.up.railway.app',
-          webhook: process.env.CMO_WEBHOOK_URL || '/api/tech-update (needs CMO update)',
+          webhook: process.env.CMO_WEBHOOK_URL || '/api/tech-update',
           pending_updates: getPendingCMOUpdates().length
         }
       },

@@ -1,9 +1,9 @@
-# 🤖 CTO AIPA v3.2 - AI Technical Co-Founder
+# 🤖 CTO AIPA v3.3 - AI Technical Co-Founder + Coding Teacher
 
-**Your Autonomous AI CTO running on Oracle Cloud Infrastructure**
+**Your Autonomous AI CTO that CODES and TEACHES on Oracle Cloud Infrastructure**
 
 [![Status](https://img.shields.io/badge/status-live-brightgreen)](http://163.192.99.45:3000)
-[![Version](https://img.shields.io/badge/version-3.2.0-blue)]()
+[![Version](https://img.shields.io/badge/version-3.3.0-blue)]()
 [![Cost](https://img.shields.io/badge/cost-%240%2Fmonth-success)]()
 [![AI](https://img.shields.io/badge/AI-Claude%20Opus%204-purple)]()
 [![Oracle Cloud](https://img.shields.io/badge/Oracle%20Cloud-Production-red)]()
@@ -31,19 +31,20 @@ CTO AIPA is not just a code reviewer — it's a **true AI Technical Co-Founder**
 
 ---
 
-## 🆕 What's New in v3.2
+## 🆕 What's New in v3.3
 
 | Feature | Description |
 |---------|-------------|
+| **🎓 Learn to Code** | `/learn <topic>` - Structured coding lessons |
+| **💻 CTO Writes Code** | `/code <repo> <task>` - CTO creates PRs with real code! |
+| **🔧 CTO Fixes Bugs** | `/fix <repo> <issue>` - CTO fixes issues automatically! |
+| **📚 Explain Concepts** | `/explain <concept>` - Understand any coding concept |
+| **🏋️ Coding Exercises** | `/exercise` - Daily coding challenges |
 | **📸 Screenshot Analysis** | Send any image - errors, UI, diagrams - get AI analysis! |
 | **💡 Idea Capture** | `/idea <text>` - Save startup ideas with AI feedback |
 | **📊 Ecosystem Stats** | `/stats` - Weekly commits, most active repos, metrics |
 | **☀️ Daily Briefings** | Morning summary at 8 AM Panama time with today's focus |
-| **🔔 Proactive Alerts** | Get notified about stale repos and service issues |
 | **🎤 Voice Messages** | Send voice notes - Whisper transcribes, Claude responds |
-| **🧠 Ask CTO** | Ask your technical co-founder questions anytime |
-| **📥 Push Monitoring** | Reviews direct commits to main (not just PRs!) |
-| **🎯 Ecosystem Awareness** | Knows all 11 AIdeazz repos and their roles |
 | **🚀 Claude Opus 4** | Best AI model for coding + vision analysis |
 
 ---
@@ -169,19 +170,21 @@ Chat with your CTO from your phone — now with voice messages!
 
 | Command | Description |
 |---------|-------------|
-| `/start` | Welcome message + enable daily briefings |
-| `/daily` | Get your morning briefing now |
+| `/menu` | 📋 Show organized menu of all commands |
+| `/learn <topic>` | 🎓 Start a coding lesson |
+| `/exercise` | 🏋️ Get a coding challenge |
+| `/explain <concept>` | 📚 Explain any coding concept |
+| `/code <repo> <task>` | 💻 CTO writes code & creates PR! |
+| `/fix <repo> <issue>` | 🔧 CTO fixes bugs & creates PR! |
 | `/stats` | 📊 Ecosystem metrics & weekly activity |
+| `/daily` | ☀️ Get your morning briefing |
 | `/idea <text>` | 💡 Capture startup ideas |
 | `/ideas` | 💾 View all saved ideas |
-| `/status` | AIdeazz ecosystem status |
-| `/ask <question>` | Ask any technical question |
-| `/review <repo>` | Review latest commit |
-| `/alerts` | Toggle proactive alerts on/off |
-| `/repos` | List all 11 repositories |
-| `/suggest` | Get today's suggestion |
-| `/roadmap` | See technical roadmap |
-| `/help` | Show all commands |
+| `/ask <question>` | 💬 Ask any technical question |
+| `/review <repo>` | 🔍 Review latest commit |
+| `/repos` | 📋 List all 11 repositories |
+| `/alerts` | 🔔 Toggle proactive alerts |
+| `/status` | 🏥 Service health check |
 
 ### 📸 Screenshot Analysis (NEW!)
 
@@ -316,6 +319,7 @@ curl http://163.192.99.45:3000/cmo-updates
 - [x] **Phase 3:** Push monitoring + Ask CTO + Opus 4
 - [x] **Phase 3.1:** Daily briefings + Proactive alerts + Voice messages
 - [x] **Phase 3.2:** Screenshot analysis + Idea capture + Ecosystem stats
+- [x] **Phase 3.3:** Learn to code + CTO writes code + CTO fixes bugs 🆕
 - [ ] **Phase 4:** Multi-repo learning, custom coding standards
 - [ ] **Phase 5:** CFO AIPA, CPO AIPA, CEO AIPA
 
@@ -375,4 +379,4 @@ Built in 2 days | 700+ lines of TypeScript | Zero infrastructure cost | Live in 
 
 **This is capital-efficient AI development at scale.** 🚀
 
-**Version 3.2.0 | December 24, 2025 | 🟢 Production**
+**Version 3.3.0 | December 24, 2025 | 🟢 Production**

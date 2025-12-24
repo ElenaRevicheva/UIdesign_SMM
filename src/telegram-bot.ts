@@ -829,15 +829,20 @@ Important:
         // File doesn't exist, that's fine
       }
       
-      await octokit.repos.createOrUpdateFileContents({
+      const createFileParams: any = {
         owner: 'ElenaRevicheva',
         repo: repoName,
         path: filename,
         message: commitMessage,
         content: Buffer.from(code).toString('base64'),
-        branch: branchName,
-        sha: fileSha
-      });
+        branch: branchName
+      };
+      
+      if (fileSha) {
+        createFileParams.sha = fileSha;
+      }
+      
+      await octokit.repos.createOrUpdateFileContents(createFileParams);
       
       // 6. Create PR
       const { data: pr } = await octokit.pulls.create({
@@ -918,13 +923,147 @@ I'll analyze the code, fix the issue, and open a PR! 🚀`, { parse_mode: 'Markd
     
     await ctx.reply(`🔧 Analyzing "${issue}" in ${repoName}...\n\n⏳ Looking at the code...`);
     
-    // For now, redirect to /code with fix context
-    const fixTask = `Fix: ${issue}`;
-    ctx.message!.text = `/code ${repoName} ${fixTask}`;
-    await bot.handleUpdate({ 
-      update_id: Date.now(), 
-      message: ctx.message 
-    });
+    // Reuse the /code logic with fix context
+    await ctx.reply(`🔧 Working on fixing "${issue}" in ${repoName}...\n\n⏳ Analyzing code and creating fix...`);
+    
+    try {
+      // Get repo info
+      const { data: repoData } = await octokit.repos.get({
+        owner: 'ElenaRevicheva',
+        repo: repoName
+      });
+      
+      const defaultBranch = repoData.default_branch;
+      
+      // Get relevant files for context
+      let fileContext = '';
+      try {
+        const { data: contents } = await octokit.repos.getContent({
+          owner: 'ElenaRevicheva',
+          repo: repoName,
+          path: ''
+        });
+        
+        if (Array.isArray(contents)) {
+          fileContext = contents.slice(0, 10).map((f: any) => f.name).join(', ');
+        }
+      } catch {}
+      
+      // Ask Claude to analyze and fix
+      const fixPrompt = `${AIDEAZZ_CONTEXT}
+
+Elena wants to fix: "${issue}"
+Repository: ${repoName}
+Files: ${fileContext}
+
+Analyze this issue and provide a fix. Return in this format:
+
+FILENAME: <file to create or modify>
+\`\`\`
+<complete file contents with the fix>
+\`\`\`
+
+COMMIT_MESSAGE: fix: <description>
+
+PR_TITLE: Fix: ${issue}
+
+PR_BODY: <2-3 sentence description of the fix>
+
+Be practical and create working code.`;
+
+      const response = await anthropic.messages.create({
+        model: 'claude-opus-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: fixPrompt }]
+      });
+      
+      const firstContent = response.content[0];
+      const fixResponse = firstContent && firstContent.type === 'text' ? firstContent.text : '';
+      
+      // Parse response
+      const filenameMatch = fixResponse.match(/FILENAME:\s*(.+)/);
+      const codeMatch = fixResponse.match(/```[\w]*\n([\s\S]*?)```/);
+      const commitMatch = fixResponse.match(/COMMIT_MESSAGE:\s*(.+)/);
+      
+      if (!filenameMatch || !filenameMatch[1] || !codeMatch || !codeMatch[1]) {
+        await ctx.reply(`🔧 Here's my analysis and suggested fix:\n\n${fixResponse.substring(0, 3000)}\n\n⚠️ Apply this fix manually in Cursor!`);
+        return;
+      }
+      
+      const filename = filenameMatch[1].trim();
+      const code = codeMatch[1];
+      const commitMessage = (commitMatch && commitMatch[1]) ? commitMatch[1].trim() : `fix: ${issue}`;
+      
+      // Create branch
+      const branchName = `cto-fix/${Date.now()}`;
+      
+      const { data: refData } = await octokit.git.getRef({
+        owner: 'ElenaRevicheva',
+        repo: repoName,
+        ref: `heads/${defaultBranch}`
+      });
+      
+      await octokit.git.createRef({
+        owner: 'ElenaRevicheva',
+        repo: repoName,
+        ref: `refs/heads/${branchName}`,
+        sha: refData.object.sha
+      });
+      
+      // Check if file exists
+      let fileSha: string | undefined;
+      try {
+        const { data: existingFile } = await octokit.repos.getContent({
+          owner: 'ElenaRevicheva',
+          repo: repoName,
+          path: filename,
+          ref: defaultBranch
+        });
+        if (!Array.isArray(existingFile)) {
+          fileSha = existingFile.sha;
+        }
+      } catch {}
+      
+      // Create/update file
+      const createFileParams: any = {
+        owner: 'ElenaRevicheva',
+        repo: repoName,
+        path: filename,
+        message: commitMessage,
+        content: Buffer.from(code).toString('base64'),
+        branch: branchName
+      };
+      
+      if (fileSha) {
+        createFileParams.sha = fileSha;
+      }
+      
+      await octokit.repos.createOrUpdateFileContents(createFileParams);
+      
+      // Create PR
+      const { data: pr } = await octokit.pulls.create({
+        owner: 'ElenaRevicheva',
+        repo: repoName,
+        title: `🔧 Fix: ${issue}`,
+        body: `Automated fix by CTO AIPA\n\n**Issue:** ${issue}\n\n---\n🤖 Generated via Telegram`,
+        head: branchName,
+        base: defaultBranch
+      });
+      
+      await ctx.reply(`✅ *Fix PR Created!*
+
+🔧 Issue: ${issue}
+📁 File: ${filename}
+📝 PR: #${pr.number}
+
+🔗 Review: ${pr.html_url}
+
+Check and merge when ready! 🚀`, { parse_mode: 'Markdown' });
+      
+    } catch (error: any) {
+      console.error('Fix error:', error);
+      await ctx.reply(`❌ Error creating fix: ${error.message || 'Unknown error'}\n\nTry using Cursor for complex fixes!`);
+    }
   });
   
   // /review - Review latest commit

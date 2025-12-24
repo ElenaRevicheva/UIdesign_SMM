@@ -1,9 +1,9 @@
-# 🤖 CTO AIPA v3.0 - AI Technical Co-Founder
+# 🤖 CTO AIPA v3.1 - AI Technical Co-Founder
 
 **Your Autonomous AI CTO running on Oracle Cloud Infrastructure**
 
 [![Status](https://img.shields.io/badge/status-live-brightgreen)](http://163.192.99.45:3000)
-[![Version](https://img.shields.io/badge/version-3.0.0-blue)]()
+[![Version](https://img.shields.io/badge/version-3.1.0-blue)]()
 [![Cost](https://img.shields.io/badge/cost-%240%2Fmonth-success)]()
 [![AI](https://img.shields.io/badge/AI-Claude%20Opus%204-purple)]()
 [![Oracle Cloud](https://img.shields.io/badge/Oracle%20Cloud-Production-red)]()
@@ -17,21 +17,27 @@
 CTO AIPA is not just a code reviewer — it's a **true AI Technical Co-Founder** that:
 
 - 🔍 **Reviews every code change** (PRs AND direct pushes to main)
-- 💬 **Answers technical questions** anytime via API
+- 💬 **Answers technical questions** anytime via API or Telegram
 - 🧠 **Knows your entire ecosystem** (11 AIdeazz repositories)
 - 🔐 **Detects security vulnerabilities** before production
 - 📊 **Analyzes architecture** and suggests improvements
 - 🤝 **Coordinates with CMO AIPA** for LinkedIn announcements
+- ☀️ **Daily briefings** - Start each day informed
+- 🔔 **Proactive alerts** - CTO watches your ecosystem 24/7
+- 🎤 **Voice messages** - Talk naturally via Telegram
 - ⚡ **Runs 24/7** on enterprise infrastructure at $0/month
 
 **Result:** No code review bottlenecks. Strategic technical guidance on demand. No expensive senior developers needed.
 
 ---
 
-## 🆕 What's New in v3.0
+## 🆕 What's New in v3.1
 
 | Feature | Description |
 |---------|-------------|
+| **☀️ Daily Briefings** | Morning summary at 8 AM Panama time with today's focus |
+| **🔔 Proactive Alerts** | Get notified about stale repos and service issues |
+| **🎤 Voice Messages** | Send voice notes - Whisper transcribes, Claude responds |
 | **🧠 Ask CTO** | Ask your technical co-founder questions anytime |
 | **📥 Push Monitoring** | Reviews direct commits to main (not just PRs!) |
 | **🎯 Ecosystem Awareness** | Knows all 11 AIdeazz repos and their roles |
@@ -144,9 +150,9 @@ CTO AIPA knows and monitors **11 repositories**:
 
 ---
 
-## 📱 Telegram Bot (NEW!)
+## 📱 Telegram Bot
 
-Chat with your CTO from your phone!
+Chat with your CTO from your phone — now with voice messages!
 
 ### Setup
 
@@ -162,20 +168,44 @@ Chat with your CTO from your phone!
 
 | Command | Description |
 |---------|-------------|
-| `/start` | Welcome message |
+| `/start` | Welcome message + enable daily briefings |
+| `/daily` | Get your morning briefing now |
 | `/status` | AIdeazz ecosystem status |
 | `/ask <question>` | Ask any technical question |
 | `/review <repo>` | Review latest commit |
-| `/repos` | List all repositories |
+| `/alerts` | Toggle proactive alerts on/off |
+| `/repos` | List all 11 repositories |
 | `/suggest` | Get today's suggestion |
+| `/roadmap` | See technical roadmap |
 | `/help` | Show all commands |
 
-### Natural Chat
+### 🎤 Voice Messages (NEW!)
 
-Just send any message:
+Just hold the mic button and talk naturally:
 - "What should I focus on today?"
 - "How do I add caching to EspaLuz?"
-- "Review my architecture"
+- "Review my architecture decisions"
+
+Your voice is transcribed by Whisper (Groq) and processed by Claude Opus 4.
+
+### ☀️ Daily Briefings (NEW!)
+
+Every day at **8 AM Panama time**, you'll receive:
+- Ecosystem health status
+- Recent repo activity
+- Stale repos that need attention
+- AI-generated focus suggestion for the day
+
+Use `/alerts` to toggle on/off.
+
+### 🔔 Proactive Alerts (NEW!)
+
+CTO AIPA monitors your ecosystem and alerts you about:
+- ⚠️ Repos with no commits in 5+ days
+- 🚨 Services that go offline
+- 📊 Important status changes
+
+Alerts run every 4 hours automatically.
 
 ---
 
@@ -201,28 +231,36 @@ curl http://163.192.99.45:3000/cmo-updates
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         CTO AIPA v3.0                           │
+│                         CTO AIPA v3.1                           │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │   GitHub Webhook ────► Express Server ────► AI Analysis         │
 │        │                    │                   │               │
 │        ▼                    ▼                   ▼               │
 │   [PR or Push]        [Oracle ATP]      [Claude Opus 4]         │
-│        │                    │            [Groq Llama 3.3]       │
+│        │                    │            [Groq Llama/Whisper]   │
 │        ▼                    ▼                   │               │
 │   GitHub Comment      Memory Storage            │               │
 │        │                                        ▼               │
 │        └──────────────► CMO AIPA ──────► LinkedIn Post          │
+│                                                                 │
+│   ┌─────────────────────────────────────────────────────────┐   │
+│   │               Telegram Bot v3.1                         │   │
+│   │   🎤 Voice ──► Whisper ──► Claude ──► Response          │   │
+│   │   ☀️ Daily Briefings (8 AM Panama via node-cron)        │   │
+│   │   🔔 Proactive Alerts (every 4 hours)                   │   │
+│   └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 **Stack:**
 - **Backend:** TypeScript 5.7, Node.js 20, Express.js
-- **AI:** Claude Opus 4 (critical), Groq Llama 3.3 70B (fast)
+- **AI:** Claude Opus 4 (critical), Groq Llama 3.3 70B (fast), Groq Whisper (voice)
 - **Database:** Oracle Autonomous Database 26ai (mTLS encrypted)
 - **Infrastructure:** Oracle Cloud VM.Standard.E5.Flex, Ubuntu 22.04, PM2
-- **Integrations:** GitHub API, CMO AIPA (Railway)
+- **Integrations:** GitHub API, CMO AIPA (Railway), Telegram Bot API
+- **Scheduling:** node-cron for daily briefings and health checks
 
 ---
 
@@ -259,6 +297,7 @@ curl http://163.192.99.45:3000/cmo-updates
 - [x] **Phase 1:** Core PR review automation
 - [x] **Phase 2:** CMO integration
 - [x] **Phase 3:** Push monitoring + Ask CTO + Opus 4
+- [x] **Phase 3.1:** Daily briefings + Proactive alerts + Voice messages
 - [ ] **Phase 4:** Multi-repo learning, custom coding standards
 - [ ] **Phase 5:** CFO AIPA, CPO AIPA, CEO AIPA
 
@@ -318,4 +357,4 @@ Built in 2 days | 700+ lines of TypeScript | Zero infrastructure cost | Live in 
 
 **This is capital-efficient AI development at scale.** 🚀
 
-**Version 3.0.0 | December 23, 2025 | 🟢 Production**
+**Version 3.1.0 | December 23, 2025 | 🟢 Production**

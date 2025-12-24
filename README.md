@@ -1,9 +1,9 @@
-# 🤖 CTO AIPA v3.1 - AI Technical Co-Founder
+# 🤖 CTO AIPA v3.2 - AI Technical Co-Founder
 
 **Your Autonomous AI CTO running on Oracle Cloud Infrastructure**
 
 [![Status](https://img.shields.io/badge/status-live-brightgreen)](http://163.192.99.45:3000)
-[![Version](https://img.shields.io/badge/version-3.1.0-blue)]()
+[![Version](https://img.shields.io/badge/version-3.2.0-blue)]()
 [![Cost](https://img.shields.io/badge/cost-%240%2Fmonth-success)]()
 [![AI](https://img.shields.io/badge/AI-Claude%20Opus%204-purple)]()
 [![Oracle Cloud](https://img.shields.io/badge/Oracle%20Cloud-Production-red)]()
@@ -31,19 +31,20 @@ CTO AIPA is not just a code reviewer — it's a **true AI Technical Co-Founder**
 
 ---
 
-## 🆕 What's New in v3.1
+## 🆕 What's New in v3.2
 
 | Feature | Description |
 |---------|-------------|
+| **📸 Screenshot Analysis** | Send any image - errors, UI, diagrams - get AI analysis! |
+| **💡 Idea Capture** | `/idea <text>` - Save startup ideas with AI feedback |
+| **📊 Ecosystem Stats** | `/stats` - Weekly commits, most active repos, metrics |
 | **☀️ Daily Briefings** | Morning summary at 8 AM Panama time with today's focus |
 | **🔔 Proactive Alerts** | Get notified about stale repos and service issues |
 | **🎤 Voice Messages** | Send voice notes - Whisper transcribes, Claude responds |
 | **🧠 Ask CTO** | Ask your technical co-founder questions anytime |
 | **📥 Push Monitoring** | Reviews direct commits to main (not just PRs!) |
 | **🎯 Ecosystem Awareness** | Knows all 11 AIdeazz repos and their roles |
-| **⚙️ Configurable AI** | Change AI models via environment variables |
-| **🔗 CMO Integration** | Fixed webhook for LinkedIn announcements |
-| **🚀 Claude Opus 4** | Upgraded to best AI model for coding |
+| **🚀 Claude Opus 4** | Best AI model for coding + vision analysis |
 
 ---
 
@@ -170,6 +171,9 @@ Chat with your CTO from your phone — now with voice messages!
 |---------|-------------|
 | `/start` | Welcome message + enable daily briefings |
 | `/daily` | Get your morning briefing now |
+| `/stats` | 📊 Ecosystem metrics & weekly activity |
+| `/idea <text>` | 💡 Capture startup ideas |
+| `/ideas` | 💾 View all saved ideas |
 | `/status` | AIdeazz ecosystem status |
 | `/ask <question>` | Ask any technical question |
 | `/review <repo>` | Review latest commit |
@@ -178,6 +182,16 @@ Chat with your CTO from your phone — now with voice messages!
 | `/suggest` | Get today's suggestion |
 | `/roadmap` | See technical roadmap |
 | `/help` | Show all commands |
+
+### 📸 Screenshot Analysis (NEW!)
+
+Send any image and get instant AI analysis:
+- **Error screenshots** → Identify bug and suggest fix
+- **UI mockups** → UX feedback and improvements
+- **Architecture diagrams** → Review and optimization
+- **Code snippets** → Quick code review
+
+Just send a photo - no command needed!
 
 ### 🎤 Voice Messages (NEW!)
 
@@ -231,7 +245,7 @@ curl http://163.192.99.45:3000/cmo-updates
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         CTO AIPA v3.1                           │
+│                         CTO AIPA v3.2                           │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │   GitHub Webhook ────► Express Server ────► AI Analysis         │
@@ -245,8 +259,11 @@ curl http://163.192.99.45:3000/cmo-updates
 │        └──────────────► CMO AIPA ──────► LinkedIn Post          │
 │                                                                 │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │               Telegram Bot v3.1                         │   │
+│   │               Telegram Bot v3.2                         │   │
+│   │   📸 Photos ──► Claude Vision ──► Analysis              │   │
 │   │   🎤 Voice ──► Whisper ──► Claude ──► Response          │   │
+│   │   💡 Ideas ──► Database ──► AI Feedback                 │   │
+│   │   📊 Stats ──► GitHub API ──► Metrics Dashboard         │   │
 │   │   ☀️ Daily Briefings (8 AM Panama via node-cron)        │   │
 │   │   🔔 Proactive Alerts (every 4 hours)                   │   │
 │   └─────────────────────────────────────────────────────────┘   │
@@ -298,6 +315,7 @@ curl http://163.192.99.45:3000/cmo-updates
 - [x] **Phase 2:** CMO integration
 - [x] **Phase 3:** Push monitoring + Ask CTO + Opus 4
 - [x] **Phase 3.1:** Daily briefings + Proactive alerts + Voice messages
+- [x] **Phase 3.2:** Screenshot analysis + Idea capture + Ecosystem stats
 - [ ] **Phase 4:** Multi-repo learning, custom coding standards
 - [ ] **Phase 5:** CFO AIPA, CPO AIPA, CEO AIPA
 
@@ -357,4 +375,4 @@ Built in 2 days | 700+ lines of TypeScript | Zero infrastructure cost | Live in 
 
 **This is capital-efficient AI development at scale.** 🚀
 
-**Version 3.1.0 | December 23, 2025 | 🟢 Production**
+**Version 3.2.0 | December 24, 2025 | 🟢 Production**

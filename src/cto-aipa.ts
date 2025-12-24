@@ -514,7 +514,7 @@ async function startCTOAIPA() {
     res.json({ 
       status: 'running', 
       service: 'CTO AIPA',
-      version: '3.1.0',
+      version: '3.2.0',
       role: 'AI Technical Co-Founder',
       ecosystem: 'AIdeazz',
       features: [

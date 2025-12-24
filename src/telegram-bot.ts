@@ -9,9 +9,10 @@ import * as path from 'path';
 import * as https from 'https';
 
 // =============================================================================
-// TELEGRAM BOT FOR CTO AIPA v3.1
+// TELEGRAM BOT FOR CTO AIPA v3.2
 // Chat with your AI Technical Co-Founder from your phone!
-// Features: Daily Briefing, Proactive Alerts, Voice Messages
+// Features: Daily Briefing, Proactive Alerts, Voice Messages, 
+//           Screenshot Analysis, Idea Capture, Ecosystem Stats
 // =============================================================================
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -113,23 +114,23 @@ export function initTelegramBot(): Bot | null {
     if (ctx.chat?.id) alertChatIds.add(ctx.chat.id);
     
     const welcomeMessage = `
-🤖 *CTO AIPA v3.1*
+🤖 *CTO AIPA v3.2*
 Your AI Technical Co-Founder
 
 Hey Elena! I'm your CTO. Here's what I can do:
 
 ☀️ */daily* - Your morning briefing
-📊 */status* - Ecosystem health check
+📊 */stats* - Ecosystem metrics & activity
+💡 */idea* <text> - Capture startup ideas
+📸 *Send a photo* - I'll analyze it!
+🎤 *Voice note* - Talk naturally!
+
 💬 */ask* <question> - Ask me anything
 🔍 */review* <repo> - Review latest commit
 🔔 */alerts* - Toggle proactive alerts
 📋 */repos* - List all 11 repositories
-💡 */suggest* - Get a suggestion for today
 
-🎤 *NEW: Voice Messages!*
-Just send a voice note and I'll listen!
-
-🔔 You're now registered for daily briefings at 8 AM Panama time!
+🔔 You're registered for daily briefings at 8 AM Panama!
 
 Or just chat naturally - I'm here to help! 🚀
     `;
@@ -141,24 +142,25 @@ Or just chat naturally - I'm here to help! 🚀
     const helpMessage = `
 🆘 *CTO AIPA Commands*
 
+📊 */stats* - Ecosystem metrics & weekly activity
+💡 */idea* <text> - Capture startup ideas
 ☀️ */daily* - Morning briefing & today's focus
-📊 */status* - Check ecosystem health
+📋 */status* - Check service health
 💬 */ask* <question> - Ask any question
 🔍 */review* <repo> - Review latest commit
 🔔 */alerts* - Toggle proactive alerts
 📋 */repos* - List all 11 repositories
 💡 */suggest* - Get today's suggestion
 🛣️ */roadmap* - See technical roadmap
+💾 */ideas* - View saved ideas
+
+📸 *Screenshots & Photos*
+Send any image - error, UI, diagram - I'll analyze!
 
 🎤 *Voice Messages*
-Send a voice note - I'll transcribe and respond!
+Hold mic and talk - I'll transcribe & respond!
 
 💬 *Or just chat naturally!*
-"What should I focus on?"
-"How do I add caching to EspaLuz?"
-"Review my architecture"
-
-🔔 _Pro tip: Use /alerts to get morning briefings!_
     `;
     await ctx.reply(helpMessage, { parse_mode: 'Markdown' });
   });
@@ -257,9 +259,12 @@ Use */review* <repo-name> to review latest commit!
 • Ask CTO endpoint
 • CMO integration
 • Telegram bot
-• Daily briefings ✨
-• Voice messages ✨
-• Proactive alerts ✨
+• Daily briefings
+• Voice messages
+• Proactive alerts
+• Screenshot analysis 📸
+• Idea capture 💡
+• Ecosystem stats 📊
 
 📋 *Planned*
 • Test generation
@@ -289,6 +294,165 @@ Use */review* <repo-name> to review latest commit!
     } else {
       alertChatIds.add(chatId);
       await ctx.reply('🔔 Proactive alerts *enabled*! You\'ll receive:\n\n• ☀️ Morning briefing (8 AM Panama)\n• ⚠️ Stale repo warnings\n• 🚨 Service down alerts\n\nUse /alerts again to disable.', { parse_mode: 'Markdown' });
+    }
+  });
+  
+  // /idea - Capture startup ideas
+  bot.command('idea', async (ctx) => {
+    const ideaText = ctx.message?.text?.replace('/idea', '').trim();
+    
+    if (!ideaText) {
+      await ctx.reply('💡 Capture your startup idea!\n\nExample: `/idea Add gamification to EspaLuz with XP points and streaks`', { parse_mode: 'Markdown' });
+      return;
+    }
+    
+    try {
+      // Save idea to database
+      const ideaId = `idea_${Date.now()}`;
+      await saveMemory('CTO', 'startup_idea', { 
+        idea: ideaText,
+        id: ideaId 
+      }, ideaText, {
+        platform: 'telegram',
+        type: 'idea',
+        user_id: ctx.from?.id,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Get AI quick reaction
+      const response = await anthropic.messages.create({
+        model: 'claude-opus-4-20250514',
+        max_tokens: 300,
+        messages: [{ 
+          role: 'user', 
+          content: `${AIDEAZZ_CONTEXT}\n\nElena just captured this startup idea: "${ideaText}"\n\nGive a VERY brief reaction (2-3 sentences max): Is it good? One quick suggestion to make it better. Use emojis. Be encouraging!`
+        }]
+      });
+      
+      const firstContent = response.content[0];
+      const reaction = firstContent && firstContent.type === 'text' ? firstContent.text : '💡 Great idea!';
+      
+      await ctx.reply(`💡 *Idea Captured!*\n\n"${ideaText.substring(0, 200)}${ideaText.length > 200 ? '...' : ''}"\n\n${reaction}\n\n_Use /ideas to view all saved ideas_`, { parse_mode: 'Markdown' });
+      
+    } catch (error) {
+      console.error('Idea capture error:', error);
+      await ctx.reply('❌ Error saving idea. Try again!');
+    }
+  });
+  
+  // /ideas - View saved ideas
+  bot.command('ideas', async (ctx) => {
+    try {
+      const ideas = await getRelevantMemory('CTO', 'startup_idea', 10);
+      
+      if (!ideas || ideas.length === 0) {
+        await ctx.reply('💡 No ideas saved yet!\n\nUse `/idea <your idea>` to capture one.', { parse_mode: 'Markdown' });
+        return;
+      }
+      
+      const ideaList = ideas.map((idea: any, i: number) => {
+        const text = idea.input?.idea || idea.output || 'Unknown idea';
+        const date = idea.metadata?.timestamp ? new Date(idea.metadata.timestamp).toLocaleDateString() : '';
+        return `${i + 1}. ${text.substring(0, 80)}${text.length > 80 ? '...' : ''} _(${date})_`;
+      }).join('\n\n');
+      
+      await ctx.reply(`💡 *Your Startup Ideas*\n\n${ideaList}\n\n_Keep capturing ideas with /idea!_`, { parse_mode: 'Markdown' });
+      
+    } catch (error) {
+      console.error('Ideas list error:', error);
+      await ctx.reply('❌ Error loading ideas. Try again!');
+    }
+  });
+  
+  // /stats - Ecosystem statistics
+  bot.command('stats', async (ctx) => {
+    await ctx.reply('📊 Calculating ecosystem stats...');
+    
+    try {
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      let totalCommitsThisWeek = 0;
+      let mostActiveRepo = { name: '', commits: 0 };
+      const repoStats: { name: string; commits: number; lastCommit: string }[] = [];
+      
+      // Gather stats from all repos
+      for (const repo of AIDEAZZ_REPOS) {
+        try {
+          const commits = await octokit.repos.listCommits({
+            owner: 'ElenaRevicheva',
+            repo,
+            since: weekAgo.toISOString(),
+            per_page: 100
+          });
+          
+          const commitCount = commits.data.length;
+          totalCommitsThisWeek += commitCount;
+          
+          if (commitCount > mostActiveRepo.commits) {
+            mostActiveRepo = { name: repo, commits: commitCount };
+          }
+          
+          // Get last commit date
+          const latestCommit = commits.data[0];
+          let lastCommitText = 'No recent';
+          if (latestCommit) {
+            const commitDate = new Date(latestCommit.commit.author?.date || '');
+            const daysAgo = Math.floor((now.getTime() - commitDate.getTime()) / (1000 * 60 * 60 * 24));
+            lastCommitText = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo}d ago`;
+          }
+          
+          if (commitCount > 0) {
+            repoStats.push({ name: repo, commits: commitCount, lastCommit: lastCommitText });
+          }
+        } catch {
+          // Skip repos that error
+        }
+      }
+      
+      // Sort by most commits
+      repoStats.sort((a, b) => b.commits - a.commits);
+      
+      // Get open PRs count
+      let openPRs = 0;
+      try {
+        const prs = await octokit.search.issuesAndPullRequests({
+          q: 'is:pr is:open author:ElenaRevicheva',
+          per_page: 100
+        });
+        openPRs = prs.data.total_count;
+      } catch {}
+      
+      // Format stats
+      const topRepos = repoStats.slice(0, 5).map(r => 
+        `• ${r.name}: ${r.commits} commits (${r.lastCommit})`
+      ).join('\n');
+      
+      const avgPerDay = (totalCommitsThisWeek / 7).toFixed(1);
+      
+      const statsMessage = `📊 *AIdeazz Ecosystem Stats*
+
+📅 *This Week*
+• Total commits: ${totalCommitsThisWeek}
+• Average: ${avgPerDay}/day
+• Open PRs: ${openPRs}
+
+🔥 *Most Active*
+${mostActiveRepo.name} (${mostActiveRepo.commits} commits)
+
+📈 *Top Repos This Week*
+${topRepos || 'No activity this week'}
+
+🏆 *Productivity*
+${totalCommitsThisWeek > 20 ? '🚀 On fire!' : totalCommitsThisWeek > 10 ? '💪 Great progress!' : totalCommitsThisWeek > 5 ? '👍 Steady work!' : '🌱 Quiet week'}
+
+_Keep shipping! Use /daily for focus._`;
+
+      await ctx.reply(statsMessage, { parse_mode: 'Markdown' });
+      
+    } catch (error) {
+      console.error('Stats error:', error);
+      await ctx.reply('❌ Error calculating stats. Try again!');
     }
   });
   
@@ -443,6 +607,111 @@ ${review}`;
     } catch (error) {
       console.error('Voice message error:', error);
       await ctx.reply('❌ Error processing voice message. Please try typing instead.');
+    }
+  });
+  
+  // ==========================================================================
+  // PHOTO/SCREENSHOT ANALYSIS - Send images for AI analysis!
+  // ==========================================================================
+  
+  bot.on('message:photo', async (ctx) => {
+    await ctx.reply('📸 Analyzing your image...');
+    
+    // Register for alerts
+    if (ctx.chat?.id) alertChatIds.add(ctx.chat.id);
+    
+    try {
+      // Get the largest photo (last in array)
+      const photos = ctx.message?.photo;
+      if (!photos || photos.length === 0) {
+        await ctx.reply('❌ Could not access photo.');
+        return;
+      }
+      
+      const largestPhoto = photos[photos.length - 1];
+      if (!largestPhoto) {
+        await ctx.reply('❌ Could not access photo.');
+        return;
+      }
+      const file = await ctx.api.getFile(largestPhoto.file_id);
+      const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
+      
+      // Download photo to temp file
+      const tempFile = `/tmp/photo_${Date.now()}.jpg`;
+      await downloadFile(fileUrl, tempFile);
+      
+      // Read and convert to base64
+      const imageBuffer = fs.readFileSync(tempFile);
+      const base64Image = imageBuffer.toString('base64');
+      
+      // Clean up temp file
+      try { fs.unlinkSync(tempFile); } catch {}
+      
+      // Get caption if provided
+      const caption = ctx.message?.caption || '';
+      
+      // Analyze with Claude Vision
+      const analysisPrompt = caption 
+        ? `Elena sent this image with the message: "${caption}". Analyze it and respond to her question/request.`
+        : `Elena sent this image. Analyze what you see and provide helpful feedback. If it's:
+- An error/bug screenshot: Identify the issue and suggest a fix
+- UI/design: Give feedback on UX and suggest improvements
+- Architecture diagram: Review and suggest optimizations
+- Code snippet: Review the code
+- Anything else: Describe what you see and how it relates to AIdeazz
+
+Keep response concise for Telegram. Use emojis.`;
+
+      const response = await anthropic.messages.create({
+        model: 'claude-opus-4-20250514',
+        max_tokens: 1500,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: 'image/jpeg',
+                data: base64Image
+              }
+            },
+            {
+              type: 'text',
+              text: `${AIDEAZZ_CONTEXT}\n\n${analysisPrompt}`
+            }
+          ]
+        }]
+      });
+      
+      const firstContent = response.content[0];
+      const analysis = firstContent && firstContent.type === 'text' ? firstContent.text : 'Could not analyze image.';
+      
+      // Save to memory
+      await saveMemory('CTO', 'image_analysis', { 
+        caption,
+        has_image: true 
+      }, analysis, {
+        platform: 'telegram',
+        type: 'image_analysis',
+        timestamp: new Date().toISOString()
+      });
+      
+      // Send analysis (without Markdown to avoid parsing issues)
+      const responseMessage = `📸 Image Analysis\n\n${analysis}`;
+      
+      if (responseMessage.length > 4000) {
+        const parts = responseMessage.match(/.{1,4000}/g) || [];
+        for (const part of parts) {
+          await ctx.reply(part);
+        }
+      } else {
+        await ctx.reply(responseMessage);
+      }
+      
+    } catch (error) {
+      console.error('Photo analysis error:', error);
+      await ctx.reply('❌ Error analyzing image. Try again or describe what you see!');
     }
   });
   

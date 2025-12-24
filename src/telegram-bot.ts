@@ -448,7 +448,8 @@ ${totalCommitsThisWeek > 20 ? 'ðŸš€ On fire!' : totalCommitsThisWeek > 10 ? 'ðŸ’
 
 _Keep shipping! Use /daily for focus._`;
 
-      await ctx.reply(statsMessage, { parse_mode: 'Markdown' });
+      // Send without Markdown to avoid parsing issues with repo names containing underscores
+      await ctx.reply(statsMessage.replace(/\*/g, ''));
       
     } catch (error) {
       console.error('Stats error:', error);

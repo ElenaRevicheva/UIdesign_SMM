@@ -114,20 +114,19 @@ export function initTelegramBot(): Bot | null {
     if (ctx.chat?.id) alertChatIds.add(ctx.chat.id);
     
     const welcomeMessage = `
-🤖 *CTO AIPA v3.2*
-Your AI Technical Co-Founder
+🤖 *CTO AIPA v3.3*
+Your AI Technical Co-Founder + Coding Teacher!
 
-Hey Elena! I'm your CTO. Quick start:
+🆕 *NEW: I can code & teach!*
+/learn - Start coding lessons
+/code <repo> <task> - I write code!
+/fix <repo> <issue> - I fix bugs!
 
-📊 /stats - See your productivity
-💡 /idea - Capture startup ideas
-📸 Send photo - I analyze it!
-🎤 Voice note - Just talk!
-💬 Chat - Ask me anything!
+📊 /stats - Your productivity
+📸 Send photo - I analyze!
+🎤 Voice - Just talk!
 
-Type /menu for all commands!
-
-🔔 Daily briefings at 8 AM Panama enabled!
+Type /menu for all commands! 🚀
     `;
     await ctx.reply(welcomeMessage, { parse_mode: 'Markdown' });
   });
@@ -144,7 +143,21 @@ Type /menu for all commands!
   
   async function showMenu(ctx: Context) {
     const menuMessage = `
-🤖 *CTO AIPA v3.2 - Menu*
+🤖 *CTO AIPA v3.3 - Menu*
+
+━━━━━━━━━━━━━━━━━━━━
+🎓 *LEARN TO CODE* 🆕
+━━━━━━━━━━━━━━━━━━━━
+/learn - Pick a coding topic
+/learn typescript - Learn TS
+/exercise - Get coding challenge
+/explain <concept> - Explain anything
+
+━━━━━━━━━━━━━━━━━━━━
+💻 *CTO WRITES CODE* 🆕
+━━━━━━━━━━━━━━━━━━━━
+/code <repo> <task> - I create PR!
+/fix <repo> <issue> - I fix bugs!
 
 ━━━━━━━━━━━━━━━━━━━━
 📊 *INSIGHTS*
@@ -170,22 +183,16 @@ Type /menu for all commands!
 ━━━━━━━━━━━━━━━━━━━━
 /ask <question> - Ask any question
 /suggest - Get today's suggestion
-Just type anything - I'll respond!
-
-━━━━━━━━━━━━━━━━━━━━
-⚙️ *SETTINGS*
-━━━━━━━━━━━━━━━━━━━━
-/alerts - Toggle daily alerts
-/roadmap - See feature roadmap
 
 ━━━━━━━━━━━━━━━━━━━━
 🎤📸 *MEDIA*
 ━━━━━━━━━━━━━━━━━━━━
-🎤 Voice note → I transcribe & respond
+🎤 Voice note → I listen & respond
 📸 Send photo → I analyze it!
 
 ━━━━━━━━━━━━━━━━━━━━
-Type /menu anytime to see this!
+⚙️ /alerts /roadmap
+━━━━━━━━━━━━━━━━━━━━
     `;
     await ctx.reply(menuMessage, { parse_mode: 'Markdown' });
   }
@@ -290,6 +297,9 @@ Use */review* <repo-name> to review latest commit!
 • Screenshot analysis 📸
 • Idea capture 💡
 • Ecosystem stats 📊
+• Learn to code system 🎓
+• CTO writes code /code 💻
+• CTO fixes bugs /fix 🔧
 
 📋 *Planned*
 • Test generation
@@ -774,16 +784,16 @@ Important:
       const prTitleMatch = codeResponse.match(/PR_TITLE:\s*(.+)/);
       const prBodyMatch = codeResponse.match(/PR_BODY:\s*([\s\S]*?)(?=\n\n|$)/);
       
-      if (!filenameMatch || !codeMatch) {
+      if (!filenameMatch || !filenameMatch[1] || !codeMatch || !codeMatch[1]) {
         await ctx.reply(`🤖 Here's what I'd suggest for "${task}":\n\n${codeResponse.substring(0, 3000)}\n\n⚠️ Could not auto-create PR. You can copy this code to Cursor!`);
         return;
       }
       
       const filename = filenameMatch[1].trim();
       const code = codeMatch[1];
-      const commitMessage = commitMatch ? commitMatch[1].trim() : `feat: ${task}`;
-      const prTitle = prTitleMatch ? prTitleMatch[1].trim() : `CTO AIPA: ${task}`;
-      const prBody = prBodyMatch ? prBodyMatch[1].trim() : `Automated PR by CTO AIPA.\n\nTask: ${task}`;
+      const commitMessage = (commitMatch && commitMatch[1]) ? commitMatch[1].trim() : `feat: ${task}`;
+      const prTitle = (prTitleMatch && prTitleMatch[1]) ? prTitleMatch[1].trim() : `CTO AIPA: ${task}`;
+      const prBody = (prBodyMatch && prBodyMatch[1]) ? prBodyMatch[1].trim() : `Automated PR by CTO AIPA.\n\nTask: ${task}`;
       
       // 4. Create a new branch
       const branchName = `cto-aipa/${Date.now()}`;

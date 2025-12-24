@@ -482,6 +482,441 @@ _Keep shipping! Use /daily for focus._`;
     }
   });
   
+  // ==========================================================================
+  // LEARNING & TEACHING COMMANDS - Become a real coder!
+  // ==========================================================================
+  
+  // /learn - Structured coding lessons
+  bot.command('learn', async (ctx) => {
+    const topic = ctx.message?.text?.replace('/learn', '').trim().toLowerCase();
+    
+    if (!topic) {
+      const topicsMessage = `🎓 *Learn to Code with CTO AIPA*
+
+Choose a topic to start learning:
+
+*Beginner*
+/learn typescript - Modern JavaScript
+/learn python - AI/ML favorite
+/learn git - Version control basics
+
+*Intermediate*
+/learn api - Build REST APIs
+/learn database - SQL & NoSQL
+/learn testing - Write tests
+
+*Advanced*
+/learn architecture - System design
+/learn security - Secure coding
+/learn ai - AI/ML integration
+
+*AIdeazz Specific*
+/learn cursor - Master Cursor AI
+/learn whatsapp - WhatsApp bot dev
+/learn oracle - Oracle Cloud basics
+
+Pick one and let's start! 🚀`;
+      await ctx.reply(topicsMessage, { parse_mode: 'Markdown' });
+      return;
+    }
+    
+    await ctx.reply(`📚 Preparing your ${topic} lesson...`);
+    
+    try {
+      const lessonPrompt = `${AIDEAZZ_CONTEXT}
+
+Elena wants to learn "${topic}". She's a "vibe coder" transitioning to become a real coder.
+
+Create a structured lesson that:
+1. Explains the concept simply (2-3 sentences)
+2. Shows a practical code example (keep it short, 10-15 lines max)
+3. Gives ONE exercise she can do RIGHT NOW in her local Cursor
+4. The exercise should take 5-10 minutes max
+
+Format for Telegram (no markdown that might break):
+- Use emojis
+- Keep code blocks simple
+- Be encouraging but practical
+- End with "Try this in Cursor, then tell me how it went!"
+
+Remember: She uses Cursor AI Agents, so the exercise should work there.`;
+
+      const response = await anthropic.messages.create({
+        model: 'claude-opus-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: lessonPrompt }]
+      });
+      
+      const firstContent = response.content[0];
+      const lesson = firstContent && firstContent.type === 'text' ? firstContent.text : 'Could not generate lesson.';
+      
+      // Save progress
+      await saveMemory('CTO', 'learning_progress', { 
+        topic,
+        type: 'lesson'
+      }, lesson, {
+        platform: 'telegram',
+        type: 'learning',
+        timestamp: new Date().toISOString()
+      });
+      
+      // Split long messages
+      if (lesson.length > 4000) {
+        const parts = lesson.match(/.{1,4000}/g) || [];
+        for (const part of parts) {
+          await ctx.reply(part);
+        }
+      } else {
+        await ctx.reply(lesson);
+      }
+      
+    } catch (error) {
+      console.error('Learn error:', error);
+      await ctx.reply('❌ Error generating lesson. Try again!');
+    }
+  });
+  
+  // /exercise - Get a coding challenge
+  bot.command('exercise', async (ctx) => {
+    const difficulty = ctx.message?.text?.replace('/exercise', '').trim().toLowerCase() || 'beginner';
+    
+    await ctx.reply(`🏋️ Generating ${difficulty} coding exercise...`);
+    
+    try {
+      const exercisePrompt = `${AIDEAZZ_CONTEXT}
+
+Create a ${difficulty} coding exercise for Elena. She uses Cursor AI and is learning to code properly.
+
+Requirements:
+1. Exercise should take 10-15 minutes
+2. Should be practical (something useful for AIdeazz)
+3. Give clear step-by-step instructions
+4. Include what the expected output should look like
+5. Suggest she use Cursor Agent to help if stuck
+
+Difficulty level: ${difficulty}
+- beginner: Simple function, basic logic
+- intermediate: API call, file handling, classes
+- advanced: Architecture, async patterns, testing
+
+Format for Telegram (no complex markdown):
+🎯 Challenge: [name]
+⏱️ Time: 10-15 min
+📝 Instructions:
+1. ...
+2. ...
+✅ Expected Output:
+💡 Hint: ...
+
+Be specific and practical!`;
+
+      const response = await anthropic.messages.create({
+        model: 'claude-opus-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: exercisePrompt }]
+      });
+      
+      const firstContent = response.content[0];
+      const exercise = firstContent && firstContent.type === 'text' ? firstContent.text : 'Could not generate exercise.';
+      
+      await ctx.reply(exercise);
+      
+    } catch (error) {
+      console.error('Exercise error:', error);
+      await ctx.reply('❌ Error generating exercise. Try again!');
+    }
+  });
+  
+  // /explain - Explain any coding concept
+  bot.command('explain', async (ctx) => {
+    const concept = ctx.message?.text?.replace('/explain', '').trim();
+    
+    if (!concept) {
+      await ctx.reply('🤔 What should I explain?\n\nExample:\n/explain async await\n/explain API\n/explain git rebase\n/explain how does OAuth work');
+      return;
+    }
+    
+    await ctx.reply(`🧠 Let me explain "${concept}"...`);
+    
+    try {
+      const explainPrompt = `${AIDEAZZ_CONTEXT}
+
+Elena asks: "Explain ${concept}"
+
+She's transitioning from "vibe coder" to real coder. Explain this concept:
+1. Simple analogy (like explaining to a smart 10-year-old)
+2. Why it matters (practical use case)
+3. Quick code example if relevant (keep very short)
+4. How she can practice this in her AIdeazz projects
+
+Keep it concise for Telegram. Use emojis. Be encouraging!`;
+
+      const response = await anthropic.messages.create({
+        model: 'claude-opus-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: explainPrompt }]
+      });
+      
+      const firstContent = response.content[0];
+      const explanation = firstContent && firstContent.type === 'text' ? firstContent.text : 'Could not explain.';
+      
+      await ctx.reply(explanation);
+      
+    } catch (error) {
+      console.error('Explain error:', error);
+      await ctx.reply('❌ Error explaining concept. Try again!');
+    }
+  });
+  
+  // ==========================================================================
+  // CODING COMMANDS - CTO writes real code!
+  // ==========================================================================
+  
+  // /code - Generate code and create PR
+  bot.command('code', async (ctx) => {
+    const input = ctx.message?.text?.replace('/code', '').trim();
+    
+    if (!input) {
+      await ctx.reply(`💻 *CTO Code Generator*
+
+I'll write code and create a PR for you!
+
+Usage:
+/code <repo> <what to build>
+
+Examples:
+/code atuona Add a beautiful README
+/code EspaLuzWhatsApp Add error handling to API calls
+/code AIPA_AITCF Add /ping command to Telegram bot
+
+I'll create a branch, write the code, and open a PR! 🚀`, { parse_mode: 'Markdown' });
+      return;
+    }
+    
+    // Parse repo and task
+    const parts = input.split(' ');
+    const repoName = parts[0];
+    const task = parts.slice(1).join(' ');
+    
+    if (!repoName || !task) {
+      await ctx.reply('❌ Please provide both repo and task!\n\nExample: /code atuona Add README with project description');
+      return;
+    }
+    
+    await ctx.reply(`💻 Working on "${task}" for ${repoName}...\n\n⏳ This may take a minute...`);
+    
+    try {
+      // 1. Check if repo exists and get default branch
+      const { data: repoData } = await octokit.repos.get({
+        owner: 'ElenaRevicheva',
+        repo: repoName
+      });
+      
+      const defaultBranch = repoData.default_branch;
+      
+      // 2. Get the current file structure
+      let fileList = '';
+      try {
+        const { data: contents } = await octokit.repos.getContent({
+          owner: 'ElenaRevicheva',
+          repo: repoName,
+          path: ''
+        });
+        
+        if (Array.isArray(contents)) {
+          fileList = contents.map((f: any) => `${f.type}: ${f.name}`).join('\n');
+        }
+      } catch {
+        fileList = 'Could not fetch file list';
+      }
+      
+      // 3. Ask Claude to generate the code
+      const codePrompt = `${AIDEAZZ_CONTEXT}
+
+Elena wants you to: "${task}"
+Repository: ${repoName}
+Current files in repo:
+${fileList}
+
+Generate the code changes needed. Return your response in this EXACT format:
+
+FILENAME: <filename to create or modify>
+\`\`\`
+<file contents>
+\`\`\`
+
+COMMIT_MESSAGE: <short commit message>
+
+PR_TITLE: <PR title>
+
+PR_BODY: <PR description, 2-3 sentences>
+
+Important:
+- Generate complete, working code
+- If creating a new file, provide full contents
+- If modifying, mention what to add/change
+- Keep it practical and simple
+- This is for a real PR that will be reviewed`;
+
+      const response = await anthropic.messages.create({
+        model: 'claude-opus-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: codePrompt }]
+      });
+      
+      const firstContent = response.content[0];
+      const codeResponse = firstContent && firstContent.type === 'text' ? firstContent.text : '';
+      
+      // Parse the response
+      const filenameMatch = codeResponse.match(/FILENAME:\s*(.+)/);
+      const codeMatch = codeResponse.match(/```[\w]*\n([\s\S]*?)```/);
+      const commitMatch = codeResponse.match(/COMMIT_MESSAGE:\s*(.+)/);
+      const prTitleMatch = codeResponse.match(/PR_TITLE:\s*(.+)/);
+      const prBodyMatch = codeResponse.match(/PR_BODY:\s*([\s\S]*?)(?=\n\n|$)/);
+      
+      if (!filenameMatch || !codeMatch) {
+        await ctx.reply(`🤖 Here's what I'd suggest for "${task}":\n\n${codeResponse.substring(0, 3000)}\n\n⚠️ Could not auto-create PR. You can copy this code to Cursor!`);
+        return;
+      }
+      
+      const filename = filenameMatch[1].trim();
+      const code = codeMatch[1];
+      const commitMessage = commitMatch ? commitMatch[1].trim() : `feat: ${task}`;
+      const prTitle = prTitleMatch ? prTitleMatch[1].trim() : `CTO AIPA: ${task}`;
+      const prBody = prBodyMatch ? prBodyMatch[1].trim() : `Automated PR by CTO AIPA.\n\nTask: ${task}`;
+      
+      // 4. Create a new branch
+      const branchName = `cto-aipa/${Date.now()}`;
+      
+      // Get the SHA of the default branch
+      const { data: refData } = await octokit.git.getRef({
+        owner: 'ElenaRevicheva',
+        repo: repoName,
+        ref: `heads/${defaultBranch}`
+      });
+      
+      // Create new branch
+      await octokit.git.createRef({
+        owner: 'ElenaRevicheva',
+        repo: repoName,
+        ref: `refs/heads/${branchName}`,
+        sha: refData.object.sha
+      });
+      
+      // 5. Create or update the file
+      let fileSha: string | undefined;
+      try {
+        const { data: existingFile } = await octokit.repos.getContent({
+          owner: 'ElenaRevicheva',
+          repo: repoName,
+          path: filename,
+          ref: defaultBranch
+        });
+        if (!Array.isArray(existingFile)) {
+          fileSha = existingFile.sha;
+        }
+      } catch {
+        // File doesn't exist, that's fine
+      }
+      
+      await octokit.repos.createOrUpdateFileContents({
+        owner: 'ElenaRevicheva',
+        repo: repoName,
+        path: filename,
+        message: commitMessage,
+        content: Buffer.from(code).toString('base64'),
+        branch: branchName,
+        sha: fileSha
+      });
+      
+      // 6. Create PR
+      const { data: pr } = await octokit.pulls.create({
+        owner: 'ElenaRevicheva',
+        repo: repoName,
+        title: prTitle,
+        body: `${prBody}\n\n---\n🤖 *Generated by CTO AIPA*\nRequested via Telegram`,
+        head: branchName,
+        base: defaultBranch
+      });
+      
+      await ctx.reply(`✅ *PR Created!*
+
+📁 File: ${filename}
+🔀 Branch: ${branchName}
+📝 PR: #${pr.number}
+
+🔗 Review it here:
+${pr.html_url}
+
+Check the code and merge when ready! 🚀`, { parse_mode: 'Markdown' });
+      
+      // Save to memory
+      await saveMemory('CTO', 'code_generation', {
+        repo: repoName,
+        task,
+        filename,
+        pr_number: pr.number
+      }, `Created PR #${pr.number}`, {
+        platform: 'telegram',
+        type: 'code_generation',
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error: any) {
+      console.error('Code generation error:', error);
+      
+      if (error.status === 404) {
+        await ctx.reply(`❌ Repo "${repoName}" not found. Use /repos to see available repos.`);
+      } else if (error.status === 422) {
+        await ctx.reply(`❌ Could not create PR. The branch might already exist or there's a conflict.`);
+      } else {
+        await ctx.reply(`❌ Error creating code: ${error.message || 'Unknown error'}\n\nTry again or use Cursor for complex tasks!`);
+      }
+    }
+  });
+  
+  // /fix - Fix an issue and create PR
+  bot.command('fix', async (ctx) => {
+    const input = ctx.message?.text?.replace('/fix', '').trim();
+    
+    if (!input) {
+      await ctx.reply(`🔧 *CTO Bug Fixer*
+
+I'll fix issues and create a PR!
+
+Usage:
+/fix <repo> <issue to fix>
+
+Examples:
+/fix EspaLuzWhatsApp Fix the timeout error in API calls
+/fix atuona Add missing error handling
+/fix AIPA_AITCF Fix TypeScript compilation warnings
+
+I'll analyze the code, fix the issue, and open a PR! 🚀`, { parse_mode: 'Markdown' });
+      return;
+    }
+    
+    // Parse repo and issue
+    const parts = input.split(' ');
+    const repoName = parts[0];
+    const issue = parts.slice(1).join(' ');
+    
+    if (!repoName || !issue) {
+      await ctx.reply('❌ Please provide both repo and issue!\n\nExample: /fix EspaLuzWhatsApp Fix timeout errors');
+      return;
+    }
+    
+    await ctx.reply(`🔧 Analyzing "${issue}" in ${repoName}...\n\n⏳ Looking at the code...`);
+    
+    // For now, redirect to /code with fix context
+    const fixTask = `Fix: ${issue}`;
+    ctx.message!.text = `/code ${repoName} ${fixTask}`;
+    await bot.handleUpdate({ 
+      update_id: Date.now(), 
+      message: ctx.message 
+    });
+  });
+  
   // /review - Review latest commit
   bot.command('review', async (ctx) => {
     const repoName = ctx.message?.text?.replace('/review', '').trim();

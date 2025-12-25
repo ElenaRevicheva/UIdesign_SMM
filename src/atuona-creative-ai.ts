@@ -913,17 +913,43 @@ Use /translate to create one, or /publish will use Russian only.`);
           // Check if this card already exists
           if (!htmlContent.includes(`nft-id">#${pageId}`)) {
             // Find the last nft-card in the home section (VAULT)
-            // Pattern: find </section> for home and go back to find last nft-card
+            // Pattern: find </section> for home and insert before the closing divs
             const aboutSection = htmlContent.indexOf('<section id="about"');
             if (aboutSection > 0) {
               const homeSection = htmlContent.slice(0, aboutSection);
               
-              // Find the closing of the nft-grid (last </div> before </section>)
-              // The structure is: </div></div></section> where inner </div> closes nft-grid
-              const gridClosePattern = '</div>\n                </div>\n            </section>';
-              const gridCloseIndex = homeSection.lastIndexOf(gridClosePattern);
+              // The actual HTML structure before </section> is:
+              //                         </div>  (closes nft-content)
+              //                     </div>      (closes nft-card)
+              //                 </div>          (closes nft-grid)
+              //             </section>
+              // We need to insert the new card BEFORE the nft-card closes (before the 3 closing divs)
+              const gridClosePattern = '</div>\n                    </div>\n                </div>\n            </section>';
+              let gridCloseIndex = homeSection.lastIndexOf(gridClosePattern);
               
-              if (gridCloseIndex > 0) {
+              // Try alternative patterns if first doesn't match
+              if (gridCloseIndex <= 0) {
+                // Pattern with different spacing
+                const altPattern = '</div>\n                        </div>\n                    </div>\n                </div>\n            </section>';
+                gridCloseIndex = homeSection.lastIndexOf(altPattern);
+              }
+              
+              if (gridCloseIndex <= 0) {
+                // Fallback: find the section closing and go back
+                const sectionClose = homeSection.lastIndexOf('</section>');
+                if (sectionClose > 0) {
+                  // Find the position after the last complete nft-card (after its closing </div>)
+                  // Look for pattern: </div>\n                    </div> which closes nft-card
+                  const lastCardClose = homeSection.lastIndexOf('</div>\n                    </div>');
+                  if (lastCardClose > 0) {
+                    gridCloseIndex = lastCardClose + '</div>\n                    </div>'.length;
+                    // Insert directly at this position
+                    htmlContent = htmlContent.slice(0, gridCloseIndex) + '\n' + nftCardHtml + htmlContent.slice(gridCloseIndex);
+                    htmlModified = true;
+                    console.log(`🎭 Atuona added NFT card #${pageId} to VAULT section (fallback method)`);
+                  }
+                }
+              } else {
                 // Insert the NFT card just before the grid closes
                 htmlContent = htmlContent.slice(0, gridCloseIndex) + nftCardHtml + '                    ' + htmlContent.slice(gridCloseIndex);
                 htmlModified = true;
